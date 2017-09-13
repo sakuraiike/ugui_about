@@ -57,16 +57,6 @@ public class InputFieldScaler:MonoBehaviour,ILayoutElement
     }
 
     private Vector2 originalSize;
-
-    public ContentSizeFitter filter
-    {
-
-        get
-        {
-            return this.GetComponent<ContentSizeFitter>();
-        }
-    }
-
     private InputField _inputField;
 
     public InputField inputField
