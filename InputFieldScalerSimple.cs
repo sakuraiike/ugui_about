@@ -4,8 +4,10 @@ using UnityEngine;
 using UnityEngine.UI;
 [RequireComponent(typeof(InputField))]
 public class InputFieldScalerSimple : MonoBehaviour {
+    [Tooltip("是否以原始大小为最小值")]
     public bool keepOriginalMinSize=true;
     private Vector2 originalSize;
+    [Tooltip("当前大小")]
     public Vector2 currentSize;
     private InputField _inputField;
     private InputField inputField{
@@ -39,6 +41,7 @@ public class InputFieldScalerSimple : MonoBehaviour {
         inputField.onValueChanged.AddListener(OnValueChanged);
         OnValueChanged("");
     }
+   //使得该组件失效
     void OnDisable(){
         inputField.onValueChanged.RemoveListener(OnValueChanged);
 
