@@ -172,8 +172,8 @@ public class InputFieldScaler:MonoBehaviour,ILayoutElement
     [SerializeField][Tooltip("缩放的最小值为 Awake()中取得的值")]
     private bool keepMinOriginalSize=true;
 
-    [SerializeField][Tooltip("提高Layou计算优先级，要比InputField大 这里设为1")]
-    private int priority=1;
+    [SerializeField][Tooltip("提高Layou计算优先级，要比InputField大 这里设为2")]
+    private int priority=2;
 
     public virtual int layoutPriority { get { return priority; } }
 
