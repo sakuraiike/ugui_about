@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -9,7 +9,7 @@ public class ImageObj : MonoBehaviour,IInitializePotentialDragHandler,IBeginDrag
 	public Color color=Color.red;
 	private  Vector2 previousPoint;
 	public  RawImage childRawImage;
-
+	public bool isDrawing=false;
 	public float  lineWidth=5;
 
 	private Texture2D _tex;
@@ -45,16 +45,16 @@ public class ImageObj : MonoBehaviour,IInitializePotentialDragHandler,IBeginDrag
 	public void OnDrag (PointerEventData eventData){
 		pos=	LimitedPos(eventData.position);
 	//	if(pos!=previousPoint){
-
-
-			ModifyPixel(previousPoint-new Vector2(screenPos[0].x,screenPos[0].y),pos-new Vector2(screenPos[0].x,screenPos[0].y));
-
+		this.isDrawing=true;
+		//开始点，结束点，相对原点，矩形大小
+		ModifyPixel(previousPoint,pos,new Vector2(screenPos[0].x,screenPos[0].y),currentSize);
 		this.previousPoint=pos;
 //		}
 	}
 	public void OnEndDrag (PointerEventData eventData){
 
 		pos=	LimitedPos(eventData.position);
+		isDrawing=false;
 
 	}
 	public Vector2 currentSize{
@@ -68,55 +68,54 @@ public class ImageObj : MonoBehaviour,IInitializePotentialDragHandler,IBeginDrag
 		}
 
 	}
-	public Vector2 LimitedPos(Vector2 pos){
+	void Awake(){
+
 		this.rectTransform.GetWorldCorners(this.screenPos);
+
+	}
+	public Vector2 LimitedPos(Vector2 pos){
 		if(pos.x<screenPos[0].x)pos.x=screenPos[0].x;
 		if(pos.x>screenPos[2].x)pos.x=screenPos[2].x;
 		if(pos.y<screenPos[0].y)pos.y=screenPos[0].y;
 		if(pos.y>screenPos[2].y)pos.y=screenPos[2].y;
 		return pos;
 	}
-	public void ModifyPixel(Vector2 start,Vector2 end){
-		float startxRatio=start.x*1.0f/currentSize.x;
-		float startyRation=start.y*1.0f/currentSize.y;
+	//传入的是屏幕坐标
+	public void ModifyPixel(Vector2 start,Vector2 end,Vector2 zeroPos,Vector2 size){
+		start-=zeroPos;
+		end-=zeroPos;
+		float startxRatio=start.x*1.0f/size.x;
+		float startyRation=start.y*1.0f/size.y;
 
-		float endxRatio=end.x*1.0f/currentSize.x;
-		float endyRatio=end.y*1.0f/currentSize.y;
+		float endxRatio=end.x*1.0f/size.x;
+		float endyRatio=end.y*1.0f/size.y;
 
 		Vector2 startPixel=new Vector2(startxRatio*tex.width,startyRation*tex.height);
 		Vector2 endPixel=new Vector2(endxRatio*tex.width,endyRatio*tex.height);
-		//求斜率 求 b 
+	
+
+		if(endPixel.x-startPixel.x==0){
+			for(int i=(int)Mathf.Round(Mathf.Min(startPixel.y,endPixel.y)-lineWidth),maxi=(int)Mathf.Round(Mathf.Max(startPixel.y,endPixel.y)+lineWidth);i<=maxi;i++){
+				for(int j=(int)Mathf.Round(startPixel.x-lineWidth),maxj=(int)Mathf.Round(startPixel.x+lineWidth);j<=maxj;j++){
+						tex.SetPixel(j,i,this.color);
+				}
+			}
+		}else{
+			//求斜率 求 b 
 		float k=(endPixel.y-startPixel.y)*1.0f/(endPixel.x-startPixel.x);
 		float b=startPixel.y- startPixel.x*k;
 
-		for(int i=0;i<tex.height;i++){
-			for(int j=0;j<tex.width;j++){
-				if(j<Mathf.Min(startPixel.x,endPixel.x)-lineWidth||j>Mathf.Max(startPixel.x,endPixel.x)+lineWidth||i<Mathf.Min(startPixel.y,endPixel.y)-lineWidth||i>Mathf.Max(startPixel.y,endPixel.y)+lineWidth){
-					continue;
-				}
+		for(int i=(int)Mathf.Round(Mathf.Min(startPixel.y,endPixel.y)-lineWidth),maxi=(int)Mathf.Round(Mathf.Max(startPixel.y,endPixel.y)+lineWidth);i<=maxi;i++){
+			for(int j=(int)Mathf.Round(Mathf.Min(startPixel.x,endPixel.x)-lineWidth),maxj=(int)Mathf.Round(Mathf.Max(startPixel.x,endPixel.x)+lineWidth);j<=maxj;j++){
 				if(Mathf.Abs(k*j-i+b)/Mathf.Sqrt(k*k+1)<lineWidth){
-
 					tex.SetPixel(j,i,this.color);
-				
 				}
 
 			}
 
 		}
+		}
 		tex.Apply();
 
 	}
 }
-	/*
-
-	// Use this for initialization
-	//void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
-}
-*/
